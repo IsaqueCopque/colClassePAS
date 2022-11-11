@@ -1,5 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+import pandas as pd
 import random
 
 #Variáveis globais
@@ -66,6 +67,24 @@ def plotar_grafo():
     # plt.tight_layout()
     plt.show()
 
+def mostrar_tabela():
+    """
+    Exibe uma tabela com os vértices das cores.
+    """
+    print("=====Resultado do Col_Classe_Pas=====")
+    vertices = []
+    for cor in classe:
+        nomeVertices = ""
+        for v in cor:
+            nomeVertices+= v+" "
+        vertices.append(nomeVertices)
+    df = pd.DataFrame(
+        data = vertices,
+        index=list(i for i in range (1,len(classe)+1)),
+        columns=["Vértices"])
+    df.index.name = "Cor"
+    print(df)
+    print("=====================================")
 
 #-------Algoritmo Col_Classe_PAS--------
 G = start_grafo()
@@ -88,5 +107,5 @@ while len(Y): #While Y != Vazio
             Y.pop(Y.index(v)) #Y = V - {v}
     cor = cor+1
 
-print(classe)
+mostrar_tabela()
 plotar_grafo()
