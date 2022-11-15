@@ -9,16 +9,27 @@ cor = 0
 classe = [[s]] #Classe[cor] <- s 
 Y = None
 demanda = []
+capacidade = []
 #-----------------
 def start_grafo():
     """
     Forma o grafo de entrada do algoritmo.
     """
-    horariosT = [(1,[1,2]),(2,[1,2]),(3,[3])] #(turma,[horarios])
+    #----Parâmetros de entrada
+    # horariosT = [(1,[1,2]),(2,[1,2]),(3,[3])] #(turma,[horarios]) Ex1
+    # horariosT = [(1,[1,2,4]),(2,[1,3,5]),(3,[1,2,6])] #(turma,[horarios]) Ex2
+    horariosT = [(1,[1,3,5]),(2,[2,4,6]),(3,[1,2,3]),(4,[1,4]),(5,[2,4])] #(turma,[horarios]) Ex3
+    qtAlunos = [12,15,20,10,14] #quantidade de alunos para cada turma
+    limSalas = [14,25,15,17,32] #capacidades de alunos para cada sala
+    for qt in qtAlunos:
+        demanda.append(qt)
+    for limite in limSalas:
+        capacidade.append(limite)
+    #----------
     G = nx.Graph()
     
     for h1 in horariosT: 
-        for horario in h1[1]: #adiciona vértices
+        for horario in h1[1]: #adiciona vértices, para cada turma i e horarios j forma vértice TiHj
             G.add_node('T%dH%d'%(h1[0],horario))
         for h2 in horariosT:
             if h1 is not h2: #não comparar com a mesma turma
@@ -82,9 +93,9 @@ def mostrar_tabela():
         data = vertices,
         index=list(i for i in range (1,len(classe)+1)),
         columns=["Vértices"])
-    df.index.name = "Cor"
+    df.index.name = "Sala"
     print(df)
-    print("=====================================")
+    print("=====================================")    
 
 #-------Algoritmo Col_Classe_PAS--------
 G = start_grafo()
@@ -102,7 +113,7 @@ while len(Y): #While Y != Vazio
             if v_cor in N_v:
                 adjacente = True
                 break
-        if not adjacente: #classe[cor] ñ adjacente a v (FALTA VERIFICAR A DEMANDA)
+        if not adjacente and (capacidade[cor]>=demanda[(int(v[1])-1)]) : #classe[cor] ñ adjacente a v e capacidade sala compatível
             classe[cor].append(v)
             Y.pop(Y.index(v)) #Y = V - {v}
     cor = cor+1
