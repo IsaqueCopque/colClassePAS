@@ -4,28 +4,58 @@ import pandas as pd
 import random
 
 #Variáveis globais
-s = "T1H1"   #vértice qualquer
+s = ""   #vértice qualquer
 cor = 0
-classe = [[s]] #Classe[cor] <- s 
+classe = []
 Y = None
 demanda = []
 capacidade = []
+
 #-----------------
 def start_grafo():
     """
-    Forma o grafo de entrada do algoritmo.
+    Recebe dados da entrada e forma o grafo de entrada do algoritmo.
     """
-    #----Parâmetros de entrada
-    # horariosT = [(1,[1,2]),(2,[1,2]),(3,[3])] #(turma,[horarios]) Ex1
-    # horariosT = [(1,[1,2,4]),(2,[1,3,5]),(3,[1,2,6])] #(turma,[horarios]) Ex2
-    horariosT = [(1,[1,3,5]),(2,[2,4,6]),(3,[1,2,3]),(4,[1,4]),(5,[2,4])] #(turma,[horarios]) Ex3
-    qtAlunos = [12,15,20,10,14] #quantidade de alunos para cada turma
-    limSalas = [14,25,15,17,32] #capacidades de alunos para cada sala
-    for qt in qtAlunos:
-        demanda.append(qt)
-    for limite in limSalas:
-        capacidade.append(limite)
-    #----------
+    horariosT = [] #(turma,[horarios])
+
+    #Turmas
+    qtTurmas = int( input('Informe a quantidade de turmas: '))
+    if qtTurmas <= 0:
+        print("Quantidade inválida de turmas")
+        return False
+    #Horarios
+    for i in range(1,qtTurmas+1):
+        qtHorarios = int( input('Informe a quantidade de horarios da turma %d: '%i))
+        if(qtHorarios < 0):
+            print("Quantidade inválida de horarios")
+            return False
+        horarios = []
+        print('Informe os %d horarios da turma %d'%(qtHorarios,i))
+        for j in range (0, qtHorarios):
+            horarios.append(int (input('H%d: '%(j+1)) ))
+        horariosT.append( (i,horarios) )
+
+        #Entrada tamanho da turma
+        tam = int( input('Informe o tamanho da turma %d: '%(j+1)))
+        if tam <= 0:
+            print("Tamanho de turma inválido")
+            return False
+        demanda.append(tam)
+
+    global s
+    s = 'T1H%d'%(horariosT[0][1][0]) #define vértice aleatório como primeiro horario da turma 1
+    classe.append([s]) #Classe[0] <- s 
+
+    #Entrada tamanho das salas
+    qtSalas = int(input('Informe a quantidade de salas: '))
+    for i in range(0, qtSalas):
+        tam = int( input('Informe a capacidade da sala %d: '%(i+1)) )
+        if tam <= 0:
+            print("Capacidade inválida")
+            return False
+        capacidade.append(tam)
+
+    #-----Montagem do grafo------
     G = nx.Graph()
     
     for h1 in horariosT: 
@@ -100,23 +130,24 @@ def mostrar_tabela():
 #-------Algoritmo Col_Classe_PAS--------
 G = start_grafo()
 
-while len(Y): #While Y != Vazio
+if G != False:
+    while len(Y): #While Y != Vazio
 
-    if cor > len(classe)-1: #posições ainda vazias de classe, criar cor
-        classe.append([])
+        if cor > len(classe)-1: #posições ainda vazias de classe, criar cor
+            classe.append([])
 
-    YintersecVdeG = [v for v in list(G.nodes) if v in Y]
-    for v in YintersecVdeG:
-        N_v = list(G.adj[v]) #vizinhança de v
-        adjacente = False
-        for v_cor in classe[cor]:
-            if v_cor in N_v:
-                adjacente = True
-                break
-        if not adjacente and (capacidade[cor]>=demanda[(int(v[1])-1)]) : #classe[cor] ñ adjacente a v e capacidade sala compatível
-            classe[cor].append(v)
-            Y.pop(Y.index(v)) #Y = V - {v}
-    cor = cor+1
+        YintersecVdeG = [v for v in list(G.nodes) if v in Y]
+        for v in YintersecVdeG:
+            N_v = list(G.adj[v]) #vizinhança de v
+            adjacente = False
+            for v_cor in classe[cor]:
+                if v_cor in N_v:
+                    adjacente = True
+                    break
+            if not adjacente and (capacidade[cor]>=demanda[(int(v[1])-1)]) : #classe[cor] ñ adjacente a v e capacidade sala compatível
+                classe[cor].append(v)
+                Y.pop(Y.index(v)) #Y = V - {v}
+        cor = cor+1
 
-mostrar_tabela()
-plotar_grafo()
+    mostrar_tabela()
+    plotar_grafo()
