@@ -1,12 +1,13 @@
-import networkx as nx
-import matplotlib.pyplot as plt
-import pandas as pd
-import random
+import re
 
 H = [] #horarios
-S = [] #capacidade das salas
-salasDisponiveis = []
-T = [] #tamanhos das turmas
+S = [] #salas
+Tt = [] #tamanhos das turmas
+Ts = [] #capacidade das salas
+maiorS = 0  #sala de maior tamanho
+
+#-------------------------------------------------
+
 
 def get_dados():
     """
@@ -26,60 +27,59 @@ def get_dados():
         horariosI = []
         print('Informe os %d horarios da turma %d'%(qtHorarios,i))
         for j in range (0, qtHorarios):
-            horariosI.append( input('H%d: '%(j+1)) )
+            horariosI.append(int (input('H%d: '%(j+1)) ))
         H.append(horariosI)
         #Entrada tamanho da turma
         tam = int( input('Informe o tamanho da turma %d: '%(j+1)))
         if tam <= 0:
             print("Tamanho de turma inválido")
             return
-        T.append(tam)
+        Tt.append(tam)
     #Entrada tamanho das salas
+    global maiorS
     qtSalas = int(input('Informe a quantidade de salas: '))
     for i in range(0, qtSalas):
         tam = int( input('Informe a capacidade da sala %d: '%(i+1)) )
         if tam <= 0:
             print("Capacidade inválida")
             return
-        S.append(tam)
-        salasDisponiveis.append(i)
+        Ts.append(tam)
+        if tam > Ts[maiorS]: #atualiza o indice da maior sala
+            maiorS = i
+        S.append([]) #adiciona sala vazia
+        
 
-def menor_disponivel(tam):
+def encontrar_sala(turma,horario):
     """
-    Retorna a menor sala disponível com tamanho suficiente
+    Retorna a menor sala disponível com tamanho suficiente.
     """
-    menorT = S[salasDisponiveis[0]]
-    for i in salasDisponiveis:
-        if S[i] < menorT and S[i] >= tam:
-            menorT = S[i]
-    if menorT < tam:
-        print("Não existe sala disponível para a capacidade %d"%tam)
-        return -1
-    return menorT
+    print("Inserindo T%dH%d"%(turma,horario))
+    menorT = Ts[maiorS]
+    sala = 0
+    for i,si in enumerate(S): #Percorre salas
+        if Ts[i] <= menorT and Ts[i] >= Tt[turma]: #Sala menor que a menor sala atual com tamanho suficiente
+            print("I = %d , Ts[i] = %d >= Tturma = %d "%(i,Ts[i],Tt[turma]))
+            disponivel = True
+            for aula in si: #Se a sala não possui outra aula no mesmo horario
+                if re.findall("H%d"%horario,aula):
+                    disponivel = False
+                    break
+            if disponivel:
+                sala = i
+                menorT = Ts[i]
+    return sala
 
 get_dados()
 
-#-----Algoritmo----------------
+#-----------Algoritmo------------
+for turmaI, turma in enumerate(H): 
+    for horario in turma:
+        sala = encontrar_sala(turmaI, horario)
+        S[sala].append("T%dH%d"%(turmaI+1,horario))
 
-
-"""
-
-3
-2
-1
-2
-25
-2
-1
-2
-30
-1
-1
-10
-4
-62
-31
-25
-10
-
-"""
+print("=====Resultado=====")
+for salaI,sala in enumerate(S):
+    print("\nSala %d: "%(salaI+1))
+    for turma in sala:
+        print(turma + " ")
+print("===================")
